@@ -321,6 +321,7 @@ class modquery extends DolibarrModules
         	'url'=>'/query/query.php',
         	'langs'=>'query.lang',
         	'position'=>101,
+            'perms'=>'$user->rights->query->all->read',
         	'target'=>'',
         	'user'=>2
         );
@@ -335,6 +336,7 @@ class modquery extends DolibarrModules
         	'leftmenu'=>'dash_list',
         	'url'=>'/query/dashboard.php',
         	'position'=>201,
+            'perms'=>'$user->rights->query->all->read',
         	'target'=>'',
         	'user'=>2
         );

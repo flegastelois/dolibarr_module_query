@@ -20,6 +20,7 @@ class TQuery extends TObjetStd {
 			,'LINE'=>$langs->trans('Lines')
 			,'PIE'=>$langs->trans('Pie')
 			,'AREA'=>$langs->trans('Area')
+			,'GEOMARKER'=>$langs->trans('GeoMarker')
 		);
 		
 		$this->TClassName = array(
@@ -101,6 +102,9 @@ class TQuery extends TObjetStd {
 		}
 		else if($this->type == 'AREA') {
 			return $this->runChart($PDOdb,'AreaChart',$table_element,$objectid);
+		}
+		else if($this->type == 'GEOMARKER') {
+			return $this->runGeoChart($PDOdb,'markers',$table_element,$objectid);
 		}
 		else if($this->type == 'SIMPLELIST' || $this->preview) {
 			return load_fiche_titre($this->title).$this->runList($PDOdb,dol_buildpath('/query/tpl/html.simplelist.tbs.html'),$table_element,$objectid);
@@ -556,6 +560,61 @@ class TQuery extends TObjetStd {
 			$html.= $form->end_form();
 //			var_dump(htmlentities($html));
 			return $html;
+	}
+	function runGeoChart(&$PDOdb, $type = 'markers',$table_element='',$objectid=0) {
+		global $conf;
+		
+		$sql=$this->getSQL($table_element,$objectid);
+		$TBind = $this->getBind();
+		$TSearch = $this->getSearch();
+		$THide = $this->getHide();
+		$TTitle = $this->getTitle();
+		$TTranslate = $this->getTranslate();
+		$TOperator = $this->getOperator();
+
+		$xaxis = strtr($this->xaxis,'.','_');
+
+		$html = '';
+		
+		$form=new TFormCore();
+		$html.= $form->begin_form('auto','formQuery'. $this->getId(),'get');
+		
+		$html.=  $form->hidden('action', 'run');
+		$html.=  $form->hidden('id', GETPOST('id') ? GETPOST('id') : $this->getId());
+		
+		if($this->show_details) $html.= '<div class="query">'.$sql.'</div>';
+		
+		$r=new TListviewTBS('geochart'.$this->getId());
+		$html .= $r->render($PDOdb, $sql,array(
+			'type'=>'geochart'
+			,'chartType'=>$type
+			,'translate'=>$TTranslate
+			,'liste'=>array(
+				'titre'=>$this->title
+			)
+			,'limit'=>array('global'=> $this->nb_result_max)
+			,'title'=>$TTitle
+			,'xaxis'=>$xaxis
+			,'hide'=>$THide
+			,'search'=>$TSearch
+			,'region'=>'FR'
+			,'operator'=>$TOperator
+		),$TBind);
+		
+		if($this->show_details) {
+				$html.=  '<div class="query">';
+				$Tab=array();
+				foreach($r->TBind as $f=>$v) {
+					$Tab[] = $f.' : '.$v;
+				}
+				$html.=  implode(', ', $Tab);
+				$html.=  '</div>';
+				
+		}
+			
+		$html.=$form->end_form();
+		
+		return $html;
 	}
 	
 }

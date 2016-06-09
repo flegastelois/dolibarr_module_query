@@ -17,6 +17,8 @@ $PDOdb=new TPDOdb;
 switch ($action) {
 	
 	case 'clone':
+		if(empty($user->rights->query->all->create)) accessforbidden();
+		
 		$query->load($PDOdb, GETPOST('id'));
 		$query->rowid = 0;
 		$query->title.=' ('.$langs->trans('Copy').')';
@@ -25,6 +27,8 @@ switch ($action) {
 		
 		break;
 	case 'delete':
+		if(empty($user->rights->query->all->create)) accessforbidden();
+
 		$query->load($PDOdb, GETPOST('id'));
 		$query->delete($PDOdb);
 		setEventMessage($langs->trans('DeleteSuccess'));
