@@ -191,7 +191,7 @@ function init_js(&$query) {
 	if(!empty($query->TMode)) {
 		foreach($query->TMode as $f=>$v) {
 			
-			echo ' $(\'#fields [sql-act="mode"][field="'.addslashes($f).'"]\').val("'. addslashes($v) .'"); ';
+			echo ' $(\'#fields [sql-act="mode"][field="'.addslashes($f).'"]\').val("'. addslashes($v) .'").change(); ';
 			
 		}
 		
@@ -263,8 +263,14 @@ function init_js(&$query) {
 
 	if(!empty($query->TTotal)) {
 		foreach($query->TTotal as $f=>$v) {
+			if(is_array($v)) {
+				echo ' $("[sql-act=\'total\'][field=\''.$f.'\']").val("'. addslashes($v[0]) .'").change(); ';
+				echo ' $("[sql-act=\'field-total-group\'][field=\''.$f.'\']").val("'. addslashes($v[1]) .'"); ';
+			}
+			else{
+				echo ' $("[sql-act=\'total\'][field=\''.$f.'\']").val("'. addslashes($v) .'"); ';	
+			}
 			
-			echo ' $("[sql-act=\'total\'][field=\''.$f.'\']").val("'. addslashes($v) .'"); ';
 			
 		}
 	}
@@ -301,6 +307,15 @@ function fiche(&$query) {
 	llxHeader('', 'Query', '', '', 0, 0, array('/query/js/query.js'/*,'/query/js/jquery.base64.min.js'*/) , array('/query/css/query.css') );
 	
 	dol_fiche_head($query->title);
+	
+	if($query->expert == 1) {
+		if(!empty($query->sql_fields)) {
+			$TField = explode_brackets( $query->sql_fields ); 
+			$query->TField = $TField;
+		}
+					
+	}
+	
 	?>
 	<script type="text/javascript">
 		var MODQUERY_INTERFACE = "<?php echo dol_buildpath('/query/script/interface.php',1); ?>";
@@ -350,17 +365,27 @@ function fiche(&$query) {
 					+ '<option value=""> </option>'
 					+ '<option value="1">Groupé</option>'
 					+ '</select>';
-			
+		
 		var select_total	= '<select sql-act="total"> '
 					+ '<option value=""> </option>'
-					+ '<option value="sum">Total</option>'
-					+ '<option value="average">Moyenne</option>'
-					+ '<option value="count">Nombre</option>'
+					+ '<option value="sum"><?php echo $langs->trans('Total'); ?></option>'
+					+ '<option value="groupsum"><?php echo $langs->trans('TotalGroup'); ?></option>'
+					+ '<option value="average"><?php echo $langs->trans('Average'); ?></option>'
+					+ '<option value="count"><?php echo $langs->trans('CountOf'); ?></option>'
 					+ '</select>';
+					
+		var select_total_group_field = '<select sql-act="field-total-group">'
+						<?php
+						foreach($query->TField as $field) {
+							echo ' + \'<option value="'._getFieldName($field).'">'._getFieldName($field).'</option>\' ';
+						}
+						?>
+						+'</select>';
 			
 		var select_type	= '<select sql-act="type"> '
 					+ '<option value=""> </option>'
 					+ '<option value="number">Nombre</option>'
+					+ '<option value="integer">Entier</option>'
 					+ '<option value="datetime">Date/Heure</option>'
 					+ '<option value="date">Date</option>'
 					+ '<option value="hour">Heure</option>'
@@ -405,12 +430,6 @@ function fiche(&$query) {
 				
 					echo 'showQueryPreview('.$query->getId().');';
 						
-					if(!empty($query->sql_fields)) {
-
-						$TField = explode_brackets( $query->sql_fields ); 
-						$query->TField = $TField;
-					}
-					
 					if(!empty($query->TField )) {
 						foreach($query->TField as $field) {
 							
@@ -433,10 +452,9 @@ function fiche(&$query) {
 					}
 					//$TField = 
 					if(!empty($query->TField )) {
-						foreach($query->TField as $field) {
-							
-							echo ' checkField("'.$field.'"); ';
 						
+						foreach($query->TField as $field) {
+							echo ' checkField("'.$field.'"); ';
 						}
 						
 						echo 'showQueryPreview('.$query->getId().');';
