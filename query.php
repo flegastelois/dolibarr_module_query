@@ -38,6 +38,8 @@ switch ($action) {
 		break;
 	
 	case 'set-expert':
+		if(empty($user->rights->query->all->create)) accessforbidden();
+
 		$query->load($PDOdb, GETPOST('id'));
 		$query->expert = 1;
 		$query->save($PDOdb);
@@ -45,6 +47,8 @@ switch ($action) {
 	
 		break;
 	case 'set-free':	
+		if(empty($user->rights->query->all->create)) accessforbidden();
+
 		$query->load($PDOdb, GETPOST('id'));
 		$query->expert = 2;
 		$query->save($PDOdb);
@@ -52,6 +56,8 @@ switch ($action) {
 	
 		break;
 	case 'unset-expert':
+		if(empty($user->rights->query->all->create)) accessforbidden();
+
 		$query->load($PDOdb, GETPOST('id'));
 		$query->expert = 0;
 		$query->save($PDOdb);
@@ -59,13 +65,13 @@ switch ($action) {
 	
 		break;
 	case 'view':
-		
+		if(empty($user->rights->query->all->create)) accessforbidden();
+
 		$query->load($PDOdb, GETPOST('id'));
 		fiche($query);
 		
 		break;
 	case 'add':
-		
 		if(empty($user->rights->query->all->create)) accessforbidden();
 		
 		fiche($query);
