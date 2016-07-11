@@ -29,12 +29,6 @@ $o->init_db_by_vars($PDOdb);
 $o=new TQDashBoardQuery($db);
 $o->init_db_by_vars($PDOdb);
 
-$o=new TQCategory($db);
-$o->init_db_by_vars($PDOdb);
-
-$o=new TQCategoryQuery($db);
-$o->init_db_by_vars($PDOdb);
-
 $o=new TQueryMenu($db);
 $o->init_db_by_vars($PDOdb);
 
